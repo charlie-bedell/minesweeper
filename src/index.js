@@ -9,15 +9,17 @@ import reportWebVitals from './reportWebVitals';
 
 function Square(props) {
   let val;
-  if (props.value[0] !== null) {
-    val = props.value[0];
+  if (props.value.has_mine) {
+    val = '*';
   } else {
-    val = props.value[1];
+    val = props.value.num_mine_neighbors;
   }
   return (
-      <button className='square'>
-        {val}
-      </button>
+    <button
+      id={props.value.id}
+      className='square'>
+      {val}
+    </button>
     );
 }
 
@@ -44,20 +46,18 @@ class Board extends React.Component {
     let cols = [];
     for (let i = 0; i < board.length; i++) {
       cols.push(
-        <div className='board-row'>{this.renderRow(board[i])}</div>
+        <div className='board-row'>
+          {this.renderRow(board[i])}
+        </div>
       );
     }
     return cols;
-    
-    
   }
       
-      
-
   renderSquare(i) {
     return (
       <Square
-        value={i} />
+        value={i}/>
     );
   }
 
@@ -117,7 +117,7 @@ class Game extends React.Component {
         let validNeighbors = neighbor.filter(x => x !== null);
         for (let i = 0; i < validNeighbors.length; i++) {
           if (this.containsMine(boardArr,validNeighbors[i][0],validNeighbors[i][1])) {
-            boardArr[rowId][colId][1]++;
+            boardArr[rowId][colId].num_mine_neighbors++;
           }
         }
       }
@@ -126,13 +126,12 @@ class Game extends React.Component {
   }
 
   containsMine(board, rowId, colId) {
-    if (board[rowId][colId][0] === '*') {
+    if (board[rowId][colId].has_mine === true) {
       return true;
     } else {
       return false;
     }
   }
-  
 
   createMineIds(boardSize) {
     let mineIds = [];
@@ -150,9 +149,19 @@ class Game extends React.Component {
   setMines(board, width, height, mineIds) {
     for (let i = 0; i < board.length; i++) {
       if (mineIds.includes(i)) {
-        board[i] = ['*',0,true,false]; // has_mine, num_mine_neighbors, is_hidden, is_flagged
+        board[i] = {
+          id: i,
+          has_mine: true,
+          is_hidden: true,
+          is_flagged: false,
+          num_mine_neighbors: 0};
       } else {
-        board[i] = [null,0,true,false];
+        board[i] = {
+          id: i,
+          has_mine: false,
+          is_hidden: true,
+          is_flagged: false,
+          num_mine_neighbors: 0};
       }
     }
     return board;
@@ -167,17 +176,14 @@ class Game extends React.Component {
     return <Board
              width={this.state.width}
              height={this.state.height}
-             board={this.state.board}/>;
+             board={this.state.board}
+           />;
   }
 }
-
-
-
-
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <Game />
+    <Game/>
   </React.StrictMode>
 );
