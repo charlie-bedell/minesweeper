@@ -88,6 +88,7 @@ class Game extends React.Component {
     let mineIds = this.createMineIds(board.length);
     let boardList = this.setMines(board, width, height, mineIds);
     let boardArr = [];
+    // TODO: change to singular array of cell objects instead of array[array1[cell1...],array2,...arrayn]
     for (let i = 1; i <= height; i++)
       boardArr.push(boardList.slice((width*i)-width,width*i));
 
