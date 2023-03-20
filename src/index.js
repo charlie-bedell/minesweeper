@@ -9,18 +9,22 @@ import reportWebVitals from './reportWebVitals';
 
 function Square(props) {
   let val;
-  if (props.value.has_mine) {
+  if (props.value.is_hidden) {
+    val = null;
+  } else if (props.value.has_mine) {
     val = '*';
   } else {
     val = props.value.num_mine_neighbors;
   }
+  
   return (
     <button
       id={props.value.id}
-      className='square'>
+      className='square'
+      onClick={() => props.onClick(props.value.row_id,props.value.col_id)}>
       {val}
     </button>
-    );
+  );
 }
 
 class Board extends React.Component {
@@ -57,7 +61,8 @@ class Board extends React.Component {
   renderSquare(i) {
     return (
       <Square
-        value={i}/>
+        value={i}
+        onClick={(rowId,colId) => this.props.onClick(rowId,colId)}/>
     );
   }
 
@@ -71,7 +76,6 @@ class Board extends React.Component {
 }
 
 class Game extends React.Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -83,12 +87,24 @@ class Game extends React.Component {
     this.state.board = this.createBoard(this.state.width, this.state.height);
   }
 
+  handleClick(rowId,colId) {
+    let squares = this.state.board;
+    squares[rowId][colId].is_hidden = false;
+    this.setState({board: squares});
+  }
+
   createBoard(width, height) {
-    let board = Array(width*height).fill(null);
-    let mineIds = this.createMineIds(board.length);
-    let boardList = this.setMines(board, width, height, mineIds);
+    // TODO: include x y coords within cell to access its contents within the
+    // board, enabling the ability to change its state
+
+    // Create empty board
+    let boardList = Array(width*height).fill(null);
+    // randomly generate ids to assign mines to
+    let mineIds = this.createMineIds(boardList.length);
+    // place mines in cells based on mineId array
+    let board = this.setMines(boardList, mineIds);
+    // slice array into multi-dimensional array
     let boardArr = [];
-    // TODO: change to singular array of cell objects instead of array[array1[cell1...],array2,...arrayn]
     for (let i = 1; i <= height; i++)
       boardArr.push(boardList.slice((width*i)-width,width*i));
 
@@ -97,13 +113,18 @@ class Game extends React.Component {
     return boardArr;
 
   }
-
+  
   getNeighboringMines(width, height, boardArr) {
     for (let rowId=0; rowId < height; rowId++) {
       for (let colId=0; colId < width; colId++) {
-        let neighbor = [[rowId-1,colId-1],[rowId-1,colId],[rowId-1,colId+1],
-                        [rowId,colId-1],                  [rowId,colId+1],
-                        [rowId+1,colId-1],[rowId+1,colId],[rowId+1,colId+1]];
+        boardArr[rowId][colId].row_id = rowId;
+        boardArr[rowId][colId].col_id = colId;
+
+        let neighbor = [
+          [rowId-1,colId-1],[rowId-1,colId],[rowId-1,colId+1],
+          [rowId,colId-1],                  [rowId,colId+1],
+          [rowId+1,colId-1],[rowId+1,colId],[rowId+1,colId+1]
+        ];
         for (let neighborId = 0; neighborId < neighbor.length; neighborId++) {
           let neighborRow = neighbor[neighborId][0];
           let neighborCol = neighbor[neighborId][1];
@@ -127,11 +148,7 @@ class Game extends React.Component {
   }
 
   containsMine(board, rowId, colId) {
-    if (board[rowId][colId].has_mine === true) {
-      return true;
-    } else {
-      return false;
-    }
+    return board[rowId][colId].has_mine;
   }
 
   createMineIds(boardSize) {
@@ -147,22 +164,20 @@ class Game extends React.Component {
     return mineIds;
   }
 
-  setMines(board, width, height, mineIds) {
+  setMines(board, mineIds) {
     for (let i = 0; i < board.length; i++) {
+      board[i] = {
+        id: i,
+        row_id: null,
+        col_id: null,
+        has_mine: false,
+        is_hidden: true,
+        is_flagged: false,
+        num_mine_neighbors: 0
+      };
+      
       if (mineIds.includes(i)) {
-        board[i] = {
-          id: i,
-          has_mine: true,
-          is_hidden: true,
-          is_flagged: false,
-          num_mine_neighbors: 0};
-      } else {
-        board[i] = {
-          id: i,
-          has_mine: false,
-          is_hidden: true,
-          is_flagged: false,
-          num_mine_neighbors: 0};
+        board[i].has_mine = true;
       }
     }
     return board;
@@ -178,6 +193,7 @@ class Game extends React.Component {
              width={this.state.width}
              height={this.state.height}
              board={this.state.board}
+             onClick={(rowId,colId) => this.handleClick(rowId,colId)}
            />;
   }
 }
