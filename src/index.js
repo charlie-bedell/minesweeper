@@ -87,10 +87,42 @@ class Game extends React.Component {
     this.state.board = this.createBoard(this.state.width, this.state.height);
   }
 
+  getNeighbors(rowId, colId) {
+    let width = this.state.width;
+    let height = this.state.height;
+    let neighbors = [
+      [rowId-1,colId-1],[rowId-1,colId],[rowId-1,colId+1],
+      [rowId,colId-1],                  [rowId,colId+1],
+      [rowId+1,colId-1],[rowId+1,colId],[rowId+1,colId+1]
+    ];
+    for (let neighborId = 0; neighborId < neighbors.length; neighborId++) {
+      let neighborRow = neighbors[neighborId][0];
+      let neighborCol = neighbors[neighborId][1];
+
+          if ((neighborRow < 0) ||
+              (neighborRow >= height) ||
+              (neighborCol < 0) ||
+              (neighborCol >= width)) {
+            neighbors[neighborId] = null;
+          }      
+    }
+		let validNeighbors = neighbors.filter((x => x !== null));
+		return validNeighbors;
+  }
+
   handleClick(rowId,colId) {
     let squares = this.state.board;
+    let neighbors = this.getNeighbors(rowId,colId);
+    
     squares[rowId][colId].is_hidden = false;
     this.setState({board: squares});
+    
+    if ((squares[rowId][colId].num_mine_neighbors === 0) && (squares[rowId][colId].has_mine === false)) {
+      for (let neighbor = 0; neighbor < neighbors.length; neighbor ++) {
+        squares[neighbors[neighbor][0]][neighbors[neighbor][1]].is_hidden = false;
+        this.setState({board: squares});
+      }
+    }
   }
 
   createBoard(width, height) {
