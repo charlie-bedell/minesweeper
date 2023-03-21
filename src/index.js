@@ -8,20 +8,34 @@ import reportWebVitals from './reportWebVitals';
 // 1 in every 5 squares contains a mine
 
 function Square(props) {
+  let colors = ['black','blue','green','gold','orange','IndianRed','indigo','violet'];
   let val;
-  if (props.value.is_hidden) {
+  let hstyle = {color: null};
+  if (props.value.is_flagged) {
+    val = '⚑';
+    hstyle.color = 'orange';
+  } else if (props.value.is_hidden) {
     val = null;
   } else if (props.value.has_mine) {
-    val = '*';
+    val = '✱';
+    hstyle.color = 'red';
   } else {
     val = props.value.num_mine_neighbors;
+    hstyle.color = colors[props.value.num_mine_neighbors];
   }
   
   return (
     <button
       id={props.value.id}
+      syle={hstyle}
       className='square'
-      onClick={() => props.onClick(props.value.row_id,props.value.col_id)}>
+      style={hstyle}
+      onClick={() => props.onClick(props.value.row_id,props.value.col_id)}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        props.onContextMenu(props.value.row_id,props.value.col_id);
+      }
+                    }>
       {val}
     </button>
   );
@@ -62,7 +76,8 @@ class Board extends React.Component {
     return (
       <Square
         value={i}
-        onClick={(rowId,colId) => this.props.onClick(rowId,colId)}/>
+        onClick={(rowId,colId) => this.props.onClick(rowId,colId)}
+        onContextMenu={(rowId,colId) => this.props.onContextMenu(rowId,colId)}/>
     );
   }
 
@@ -82,6 +97,7 @@ class Game extends React.Component {
       width: 10,
       height: 10,
       mineDensity: 0.2,
+      numFlags: 0,
     };
 
     this.state.board = this.createBoard(this.state.width, this.state.height);
@@ -114,10 +130,13 @@ class Game extends React.Component {
     let squares = this.state.board;
     let neighbors = this.getNeighbors(rowId,colId);
     
-    squares[rowId][colId].is_hidden = false;
-    this.setState({board: squares});
     
-    if ((squares[rowId][colId].num_mine_neighbors === 0) && (squares[rowId][colId].has_mine === false)) {
+    if (squares[rowId][colId].is_flagged === false) {
+      squares[rowId][colId].is_hidden = false;
+      this.setState({board: squares});
+    }
+    if ((squares[rowId][colId].num_mine_neighbors === 0) &&
+        (squares[rowId][colId].has_mine === false)) {
       for (let neighbor = 0; neighbor < neighbors.length; neighbor ++) {
         squares[neighbors[neighbor][0]][neighbors[neighbor][1]].is_hidden = false;
         this.setState({board: squares});
@@ -125,9 +144,21 @@ class Game extends React.Component {
     }
   }
 
+  toggleFlag(rowId,colId) {
+    let squares = this.state.board;
+    let flag = squares[rowId][colId].is_flagged;
+    let incr = 0;
+    if (flag) {
+      incr--;
+    } else {
+      incr++;
+    }
+    squares[rowId][colId].is_flagged = !flag;
+    this.setState({board: squares,
+                   numFlags: this.state.numFlags + incr});
+  }
+
   createBoard(width, height) {
-    // TODO: include x y coords within cell to access its contents within the
-    // board, enabling the ability to change its state
 
     // Create empty board
     let boardList = Array(width*height).fill(null);
@@ -221,12 +252,18 @@ class Game extends React.Component {
   }
   
   render () {
-    return <Board
-             width={this.state.width}
-             height={this.state.height}
-             board={this.state.board}
-             onClick={(rowId,colId) => this.handleClick(rowId,colId)}
-           />;
+		return (
+			<div>
+        <div>Flags: {this.state.numFlags}</div>
+				<Board
+					width={this.state.width}
+					height={this.state.height}
+					board={this.state.board}
+					onClick={(rowId, colId) => this.handleClick(rowId, colId)}
+					onContextMenu={(rowId, colId) => this.toggleFlag(rowId, colId)}
+				/>
+			</div>
+    );
   }
 }
 
