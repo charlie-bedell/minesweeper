@@ -50,6 +50,10 @@ function Game() {
     }
     return mineIds;
   }, []);
+
+  const updateMineNeighbors = useCallback((board) => {
+    
+  })
   
   const createBoard = useCallback((x,y, mineDensity) => {
 		let boardSize = x * y;
