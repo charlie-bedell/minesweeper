@@ -1,8 +1,7 @@
 import React from 'react';
-import {useState, useCallback, useEffect} from 'react';
+import { useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import App from './App';
 
 // game should be 30x16
 // 1 in every 5 squares contains a mine
@@ -13,7 +12,7 @@ function Board({board_x, board_y, board}) {
   let boardRow = [];
   let rowKey = 0;
   for (let i=0; i < board.length; i++) {
-    boardRow.push(<Square key={board[i].id} value={board[i].id}></Square>);
+    boardRow.push(<Square key={board[i].id} value={board[i].mine}></Square>);
     if (boardRow.length === board_x) {
       boardList.push(<div key={rowKey} className="board-row">{boardRow}</div>);
       rowKey++;
@@ -33,59 +32,63 @@ function Square({value}) {
   );
 }
 
+
 function Game() {
   let [board_x, setBoard_x] = useState(3);
   let [board_y, setBoard_y] = useState(3);
   let [mineDensity, setMineDensity] = useState(0.2);
-  let [board, setBoard] = useState([]);
+  let [board, setBoard] = useState(createBoard(board_x,board_y,mineDensity));
 
-  const createMineIds = useCallback((mineDensity, boardSize) => {
-    let mineIds = [];
-    let numMines = Math.floor(boardSize * mineDensity);
-    while (mineIds.length < numMines) {
-      let num = Math.floor(Math.random() * boardSize);
-      if (!mineIds.includes(num)) {
-        mineIds.push(num);
-      }
-    }
-    return mineIds;
-  }, []);
-  
-  const createBoard = useCallback((x,y, mineDensity) => {
+  function createMineIds(mineDensity, boardSize) {
+	let mineIds = [];
+	let numMines = Math.floor(boardSize * mineDensity);
+	while (mineIds.length < numMines) {
+		let num = Math.floor(Math.random() * boardSize);
+		if (!mineIds.includes(num)) {
+			mineIds.push(num);
+		}
+	}
+	return mineIds;
+  }
+
+
+	function createBoard(x, y, mineDensity) {
 		let boardSize = x * y;
 		let newBoard = [];
-    let mineIds = createMineIds(mineDensity, boardSize);
+		let mineIds = createMineIds(mineDensity, boardSize);
 		for (let i = 0; i < boardSize; i++) {
-      if (mineIds.includes(i)) {
+			if (mineIds.includes(i)) {
 				newBoard.push({
 					id: i,
 					has_mine: true,
 					is_hidden: true,
 					is_flagged: false,
-					num_mine_neighbors: 0
-			  });
-      } else {
-        newBoard.push({
+					num_mine_neighbors: 0,
+					mine: '*'
+				});
+			} else {
+				newBoard.push({
 					id: i,
 					has_mine: false,
 					is_hidden: true,
 					is_flagged: false,
-					num_mine_neighbors: 0
-			  });
-      }
+					num_mine_neighbors: 0,
+					mine: ''
+				});
+			}
 		}
-		setBoard(newBoard);
-  }, [createMineIds]);
-
-  useEffect(() => {
-    createBoard(board_x,board_y, mineDensity);
-  }, [createBoard, board_x, board_y, mineDensity]
-           );
+		return newBoard;
+	}
+  
 
   function changeBoard(event) {
-    setBoard_x(parseInt(event.target.width.value));
-    setBoard_y(parseInt(event.target.height.value));
-    setMineDensity(parseFloat(event.target.mineDensity.value));
+    let new_x = event.target.width.value ? parseInt(event.target.width.value) : 3;
+    let new_y = event.target.height.value ? parseInt(event.target.height.value) : 3;
+    let newMineDensity = event.target.mineDensity.value ? parseFloat(event.target.mineDensity.value) : 0.2;
+    setBoard_x(new_x);
+    setBoard_y(new_y);
+    setMineDensity(newMineDensity);
+    setBoard(createBoard(new_x,new_y,newMineDensity));
   }
 
   function BoardSizeForm() {
