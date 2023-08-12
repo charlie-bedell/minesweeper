@@ -1,13 +1,12 @@
 import React from 'react';
-import { useState } from 'react';
 import ReactDOM from 'react-dom/client';
+import './App.css';
 import './index.css';
-import Game from "./minesweeper";
-
+import App from './App.js';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
-    <Game/>
-  </React.StrictMode>
+  // <React.StrictMode>
+    <App/>
+  // </React.StrictMode>
 );
