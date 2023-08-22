@@ -46,9 +46,8 @@ function numBombNeighbors(matrix) {
 }
 
 export function getNeighbors(row, col, matrix) {
-  const row_bound = matrix[0].length;
-  const col_bound = matrix.length;
-
+  const row_bound = matrix.length;
+  const col_bound = matrix[0].length;
   let potentialNeighbors = [
       [row-1,col-1],[row-1,col],[row-1,col+1],
       [row  ,col-1]            ,[row  ,col+1],
@@ -58,7 +57,7 @@ export function getNeighbors(row, col, matrix) {
   for (let i=0; i < potentialNeighbors.length; i++) {
     let neighbor_row = potentialNeighbors[i][0];
     let neighbor_col = potentialNeighbors[i][1];
-
+    
     if ((neighbor_row >= 0 && neighbor_row < row_bound) &&
         (neighbor_col >= 0 && neighbor_col < col_bound)) {
       neighbors.push([potentialNeighbors[i][0],potentialNeighbors[i][1]]);
