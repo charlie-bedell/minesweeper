@@ -2,14 +2,16 @@ import {useReducer} from 'react';
 import { createBoard } from '../utils/createBoard';
 import { Cell } from './cell';
 import { gameReducer } from '../reducers/gameReducer';
+import BoardOptions from './boardoptions';
 
-const BOARD_SIZE = 20;
-const BOMBS_NUM = Math.floor((BOARD_SIZE ** 2) * 0.2);
+const BOARD_WIDTH = 10;
+const BOARD_HEIGHT = 10;
+const BOMBS_NUM = Math.floor((BOARD_WIDTH * BOARD_HEIGHT) * 0.2);
 
 export default function Board() {
 
   const [gameState, dispatch] = useReducer(gameReducer, {
-    board: createBoard(BOARD_SIZE, BOARD_SIZE, BOMBS_NUM),
+    board: createBoard(BOARD_WIDTH, BOARD_HEIGHT, BOMBS_NUM),
     gameOver: false,
   });
 
@@ -20,6 +22,14 @@ export default function Board() {
   function handleContextMenu(row, col) {
     dispatch({type: 'HANDLE_CONTEXT', row, col});
   }
+
+  function handleBoardOptions(e) {
+    let boardVals = [e.width.value, e.height.value, e.mine_density.value];
+    dispatch({type: 'NEW_BOARD',
+              width: e.width.value,
+              height: e.height.value,
+              mine_density: e.mine_density.value});
+  }
   
   return (
     <div style={{
@@ -27,17 +37,18 @@ export default function Board() {
       flexDirection:'column',
       alignItems:'center'
     }}>
-    <div>{gameState.gameOver ? "Game Over!" : "Minesweeper"}</div>
-      {gameState.board.map((row, rowIdx) => (
-        <div key={rowIdx}>
-          {row.map((cell, cellIdx) => (
-            <Cell
-              key={cellIdx}
-              handleClick={handleClick}
-              handleContextMenu={handleContextMenu}
-              {...cell} />
-          ))}
-        </div>
+      <BoardOptions handler={handleBoardOptions}/>
+      <div>{gameState.gameOver ? "Game Over!" : "Minesweeper"}</div>
+			{gameState.board.map((row, rowIdx) => (
+				<div key={rowIdx}>
+					{row.map((cell, cellIdx) => (
+						<Cell
+							key={cellIdx}
+							handleClick={handleClick}
+							handleContextMenu={handleContextMenu}
+							{...cell} />
+					))}
+				</div>
       ))}
     </div>
   );

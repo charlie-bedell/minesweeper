@@ -1,4 +1,4 @@
-import { getNeighbors } from "../utils/createBoard";
+import { getNeighbors, createBoard } from "../utils/createBoard";
 
 export function gameReducer(state, action) {
   const {type, row, col} = action;
@@ -10,7 +10,6 @@ export function gameReducer(state, action) {
 					...state,
 					board: flipAll(state.board),
           gameOver: true,
-					// board: flipCell(row, col, state.board),
 				};
 			} else if (state.board[row][col].num_mine_neighbors === 0) {
 				return {
@@ -41,6 +40,19 @@ export function gameReducer(state, action) {
         ...state,
       };
     }
+  }
+
+  case "NEW_BOARD": {
+    console.log(action);
+    const width = action.width;
+    const height = action.height;
+    const mine_density = action.mine_density;
+    const bombs_num = Math.floor((width * height) * mine_density);
+    return {
+      ...state,
+      gameOver: false,
+      board: createBoard(width, height, bombs_num),
+    };
   }
     
 		default: {

@@ -12,17 +12,12 @@ to start a new game.
 right click to mark a cell with a flag.
 
 ## Todo
-- User fields to change the number of mines and size of the board.
-  - give the player the option to change the size of the board, and how many mines
-will be on the board
 - Retry button
   - on loss, click `retry` to reset the board
 - Win condition
   - display `You Win!` when all non-mine squares are visible
 - flag/bomb count
   - display number of flags used/total bomb count
-- mine neighbor value color
-  - assign unique colors to the number of neighboring mines value
 - 3x3 hover grid toggle
   - give the user a a box around the cursor on square hover, outlining the
   neighboring cells
