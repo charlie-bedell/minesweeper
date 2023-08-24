@@ -25,7 +25,29 @@ export function Cell(
       val = num_mine_neighbors;
     }
   }
-  
+
+  function cellValueColor(is_hidden, has_mine, num_mine_neighbors) {
+
+    const COLORS = {
+      0: '#aaaaaa',
+      1: '#33c4ff',
+      2: '#34e12e',
+      3: '#d0a728',
+      4: '#f1420a',
+      5: '#9b2c56',
+      6: '#1a1181',
+      7: '#c401bb',
+      8: '#000000',
+    };
+    
+    if (!is_hidden) {
+      if (has_mine) {
+        return {background: "red"};
+      } else {
+        return {color: COLORS[num_mine_neighbors]};
+      }
+    }
+  }
   
   return (
     <button
@@ -33,7 +55,8 @@ export function Cell(
       onClick={() => handleClick(row,col)}
       onContextMenu={(e) => {
         e.preventDefault();
-        handleContextMenu(row,col);}}>
+        handleContextMenu(row,col);}}
+      style={cellValueColor(is_hidden, has_mine, num_mine_neighbors)}>
       {val}
     </button>  
   );
